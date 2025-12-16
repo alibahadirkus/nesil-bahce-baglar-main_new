@@ -1,6 +1,7 @@
 import express from 'express';
 import db from '../config/database.js';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { sendWhatsAppMessage } from '../services/whatsappService.js';
 
 const router = express.Router();
 
@@ -185,13 +186,35 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     const [newActivities]: any = await db.execute(
       `SELECT va.*, 
               v.first_name as volunteer_first_name, 
-              v.last_name as volunteer_last_name
+              v.last_name as volunteer_last_name,
+              v.phone as volunteer_phone
        FROM volunteer_activities va
        LEFT JOIN volunteers v ON va.volunteer_id = v.id
        WHERE va.id IN (${placeholders2})
        ORDER BY va.id`,
       activityIds
     );
+
+    // Her gönüllüye WhatsApp mesajı gönder (async, hata olsa bile devam et)
+    const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
+    newActivities.forEach(async (activity: any) => {
+      if (activity.volunteer_phone) {
+        try {
+          const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
+          const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
+          
+          await sendWhatsAppMessage(
+            activity.volunteer_phone,
+            message,
+            activity.volunteer_id,
+            dashboardLink
+          );
+        } catch (error: any) {
+          console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
+          // Hata olsa bile aktivite oluşturma işlemi devam eder
+        }
+      }
+    });
 
     // Tek aktivite varsa tek obje döndür, çoklu varsa array
     res.status(201).json(volunteerIds.length === 1 ? newActivities[0] : newActivities);
@@ -263,13 +286,35 @@ router.post('/bulk', authenticateToken, async (req: AuthRequest, res) => {
     const [newActivities]: any = await db.execute(
       `SELECT va.*, 
               v.first_name as volunteer_first_name, 
-              v.last_name as volunteer_last_name
+              v.last_name as volunteer_last_name,
+              v.phone as volunteer_phone
        FROM volunteer_activities va
        LEFT JOIN volunteers v ON va.volunteer_id = v.id
        WHERE va.id IN (${placeholders2})
        ORDER BY va.id`,
       activityIds
     );
+
+    // Her gönüllüye WhatsApp mesajı gönder (async, hata olsa bile devam et)
+    const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
+    newActivities.forEach(async (activity: any) => {
+      if (activity.volunteer_phone) {
+        try {
+          const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
+          const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
+          
+          await sendWhatsAppMessage(
+            activity.volunteer_phone,
+            message,
+            activity.volunteer_id,
+            dashboardLink
+          );
+        } catch (error: any) {
+          console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
+          // Hata olsa bile aktivite oluşturma işlemi devam eder
+        }
+      }
+    });
 
     res.status(201).json(newActivities);
   } catch (error: any) {

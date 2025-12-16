@@ -80,6 +80,15 @@ export const volunteersAPI = {
     return response.json();
   },
   
+  getByPhone: async (phone: string) => {
+    // Public endpoint - auth gerekmez
+    const response = await fetch(`${API_BASE_URL}/volunteers/public/phone/${encodeURIComponent(phone)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch volunteer');
+    }
+    return response.json();
+  },
+  
   create: async (data: any) => {
     const response = await apiRequest('/volunteers', {
       method: 'POST',

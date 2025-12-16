@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Link as LinkIcon, Copy } from 'lucide-react';
 import { volunteersAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -148,6 +148,19 @@ const Volunteers = () => {
     }
   };
 
+  const getVolunteerDashboardLink = (volunteerId: number) => {
+    return `${window.location.origin}/volunteer/${volunteerId}`;
+  };
+
+  const handleCopyLink = (volunteerId: number) => {
+    const link = getVolunteerDashboardLink(volunteerId);
+    navigator.clipboard.writeText(link);
+    toast({
+      title: 'Link kopyalandı',
+      description: 'Gönüllü dashboard linki panoya kopyalandı',
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -176,6 +189,7 @@ const Volunteers = () => {
                 <TableHead>Telefon</TableHead>
                 <TableHead>E-posta</TableHead>
                 <TableHead>Hoşgeldin SMS</TableHead>
+                <TableHead>Dashboard Linki</TableHead>
                 <TableHead>Kayıt Tarihi</TableHead>
                 <TableHead className="text-right">İşlemler</TableHead>
               </TableRow>
@@ -201,6 +215,17 @@ const Volunteers = () => {
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyLink(volunteer.id)}
+                        title="Dashboard linkini kopyala"
+                      >
+                        <LinkIcon className="h-4 w-4 mr-1" />
+                        <span className="text-xs">Link</span>
+                      </Button>
                     </TableCell>
                     <TableCell>
                       {new Date(volunteer.created_at).toLocaleDateString('tr-TR')}

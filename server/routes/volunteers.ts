@@ -172,6 +172,26 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Telefon numarası ile gönüllü bul (public - auth gerekmez)
+router.get('/public/phone/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const [rows]: any = await db.execute(
+      'SELECT id, first_name, last_name, phone, email FROM volunteers WHERE phone = ?',
+      [phone]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Volunteer not found' });
+    }
+
+    res.json(rows[0]);
+  } catch (error: any) {
+    console.error('Get volunteer by phone error:', error);
+    res.status(500).json({ error: 'Failed to fetch volunteer' });
+  }
+});
+
 // Public gönüllü başvurusu (landing sayfası)
 router.post('/public', async (req, res) => {
   try {

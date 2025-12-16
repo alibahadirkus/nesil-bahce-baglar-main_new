@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
-import { treesAPI, studentsAPI, volunteersAPI } from '@/lib/api';
+import { treesAPI, studentsAPI, volunteersAPI, activitiesAPI } from '@/lib/api';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Calendar as CalendarIcon, TreePine, GraduationCap, Users } from 'lucide-react';
+import { Calendar as CalendarIcon, TreePine, GraduationCap, Users, Activity } from 'lucide-react';
 
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -24,6 +24,11 @@ const CalendarPage = () => {
   const { data: volunteers = [] } = useQuery({
     queryKey: ['volunteers'],
     queryFn: () => volunteersAPI.getAll(),
+  });
+
+  const { data: activities = [] } = useQuery({
+    queryKey: ['activities'],
+    queryFn: () => activitiesAPI.getAll(),
   });
 
   // Tarihe göre etkinlikleri grupla
@@ -75,6 +80,20 @@ const CalendarPage = () => {
       }
     });
 
+    // Gönüllü aktiviteleri
+    activities.forEach((activity: any) => {
+      const activityDate = format(new Date(activity.activity_date), 'yyyy-MM-dd');
+      if (activityDate === dateStr) {
+        events.push({
+          type: 'activity',
+          title: activity.title,
+          description: `${activity.volunteer_first_name || ''} ${activity.volunteer_last_name || ''}${activity.location ? ` - ${activity.location}` : ''}`,
+          icon: Activity,
+          color: 'bg-orange-100 text-orange-800',
+        });
+      }
+    });
+
     return events;
   };
 
@@ -94,6 +113,12 @@ const CalendarPage = () => {
 
     volunteers.forEach((volunteer: any) => {
       dates.push(new Date(volunteer.created_at));
+    });
+
+    activities.forEach((activity: any) => {
+      if (activity.activity_date) {
+        dates.push(new Date(activity.activity_date));
+      }
     });
 
     return dates;

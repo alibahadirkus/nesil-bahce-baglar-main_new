@@ -50,6 +50,7 @@ const WhatsApp = () => {
   const [message, setMessage] = useState('');
   const [selectedVolunteers, setSelectedVolunteers] = useState<number[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
+  const [sendDashboardLink, setSendDashboardLink] = useState(false);
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [linkContent, setLinkContent] = useState({
     title: '',
@@ -233,6 +234,10 @@ const WhatsApp = () => {
     },
   });
 
+  const getVolunteerDashboardLink = (volunteerId: number) => {
+    return `${window.location.origin}/volunteer/${volunteerId}`;
+  };
+
   const handleSingleSend = (volunteerId: number, phone: string) => {
     if (!message.trim()) {
       toast({
@@ -252,11 +257,15 @@ const WhatsApp = () => {
       return;
     }
 
+    const finalLinkUrl = sendDashboardLink 
+      ? getVolunteerDashboardLink(volunteerId)
+      : (linkUrl || undefined);
+
     sendMutation.mutate({
       volunteer_id: volunteerId,
       phone,
       message,
-      link_url: linkUrl || undefined,
+      link_url: finalLinkUrl,
     });
   };
 
@@ -288,11 +297,28 @@ const WhatsApp = () => {
       return;
     }
 
-    sendBulkMutation.mutate({
-      volunteer_ids: selectedVolunteers,
-      message,
-      link_url: linkUrl || undefined,
-    });
+    // Eğer dashboard linki gönderilecekse, her gönüllüye kendi linkini gönder
+    if (sendDashboardLink) {
+      // Her gönüllü için ayrı ayrı gönder
+      selectedVolunteers.forEach((volunteerId) => {
+        const volunteer = volunteers.find((v: any) => v.id === volunteerId);
+        if (volunteer) {
+          sendMutation.mutate({
+            volunteer_id: volunteerId,
+            phone: volunteer.phone,
+            message,
+            link_url: getVolunteerDashboardLink(volunteerId),
+          });
+        }
+      });
+    } else {
+      // Normal toplu gönderim (aynı link)
+      sendBulkMutation.mutate({
+        volunteer_ids: selectedVolunteers,
+        message,
+        link_url: linkUrl || undefined,
+      });
+    }
   };
 
   const handleToggleVolunteer = (id: number) => {
@@ -476,26 +502,50 @@ const WhatsApp = () => {
 
               <div className="space-y-2">
                 <Label>Link Ekle (Opsiyonel)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    placeholder="Link URL'si veya oluştur..."
+                <div className="flex items-center gap-2 mb-2">
+                  <Checkbox
+                    checked={sendDashboardLink}
+                    onCheckedChange={(checked) => {
+                      setSendDashboardLink(checked as boolean);
+                      if (checked) {
+                        setLinkUrl(''); // Dashboard linki seçildiğinde manuel linki temizle
+                      }
+                    }}
                     disabled={!whatsappStatus.isReady}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsLinkDialogOpen(true)}
-                    disabled={!whatsappStatus.isReady}
-                  >
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    Link Oluştur
-                  </Button>
+                  <Label className="font-normal cursor-pointer">
+                    Her gönüllüye kendi dashboard linkini gönder
+                  </Label>
                 </div>
+                {!sendDashboardLink && (
+                  <div className="flex gap-2">
+                    <Input
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      placeholder="Link URL'si veya oluştur..."
+                      disabled={!whatsappStatus.isReady}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsLinkDialogOpen(true)}
+                      disabled={!whatsappStatus.isReady}
+                    >
+                      <LinkIcon className="mr-2 h-4 w-4" />
+                      Link Oluştur
+                    </Button>
+                  </div>
+                )}
+                {sendDashboardLink && (
+                  <div className="p-3 bg-green-50 rounded border border-green-200">
+                    <p className="text-sm text-green-800">
+                      ✓ Seçilen her gönüllüye kendi dashboard linki gönderilecek
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {linkUrl && (
+              {linkUrl && !sendDashboardLink && (
                 <div className="p-3 bg-primary/10 rounded border border-primary/20">
                   <p className="text-sm">
                     <strong>Link:</strong> {linkUrl}
