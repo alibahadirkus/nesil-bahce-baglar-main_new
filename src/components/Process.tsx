@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, UserPlus, TreePine, Droplets, Sprout, Camera, X } from 'lucide-react';
 import {
@@ -17,6 +18,7 @@ import { toast } from '@/hooks/use-toast';
 import { publicStudentsAPI, publicVolunteersAPI } from '@/lib/api';
 
 const Process = () => {
+  const navigate = useNavigate();
   const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
   const [isVolunteerDialogOpen, setIsVolunteerDialogOpen] = useState(false);
   const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
@@ -50,7 +52,7 @@ const Process = () => {
       title: 'Öğrenci Kaydı',
       description:
         'Lise öğrencileri projeye kaydolur ve kendilerine bir gönüllü eşleştirilir',
-      onClick: () => setIsStudentDialogOpen(true),
+      onClick: () => navigate('/process-step/1'),
     },
     {
       step: 2,
@@ -58,13 +60,14 @@ const Process = () => {
       title: 'Gönüllü Eşleştirme',
       description:
         'Her öğrenci bir gönüllü ile eşleştirilir ve birlikte çalışmaya başlarlar',
+      onClick: () => navigate('/process-step/2'),
     },
     {
       step: 3,
       icon: TreePine,
       title: 'Gönüllü Katılımcı',
       description: 'Öğrenci ve gönüllü birlikte okul bahçesinde ağacı dikerler',
-      onClick: () => setIsVolunteerDialogOpen(true),
+      onClick: () => navigate('/process-step/3'),
     },
     {
       step: 4,
@@ -72,11 +75,13 @@ const Process = () => {
       title: 'Bakım ve Sulama',
       description:
         "Ağacın düzenli bakımı ve sulaması yapılır, her adımda gönüllüye bilgi SMS'i gönderilir",
+      onClick: () => navigate('/process-step/4'),
     },
     {
       step: 5,
       icon: Sprout,
       title: 'Büyüme Takibi',
+      onClick: () => navigate('/process-step/5'),
     },
     {
       step: 6,

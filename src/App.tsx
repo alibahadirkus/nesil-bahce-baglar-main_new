@@ -17,6 +17,8 @@ import SMS from "./pages/admin/SMS";
 import WhatsApp from "./pages/admin/WhatsApp";
 import Images from "./pages/admin/Images";
 import Preview from "./pages/Preview";
+import VolunteerDashboard from "./pages/VolunteerDashboard";
+import ProcessStepGallery from "./pages/ProcessStepGallery";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/preview/:id" element={<Preview />} />
+          <Route path="/volunteer/:id" element={<VolunteerDashboard />} />
+          <Route path="/process-step/:stepNumber" element={<ProcessStepGallery />} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<Login />} />
