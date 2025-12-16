@@ -25,6 +25,18 @@ router.get('/status', authenticateToken, (req, res) => {
 // WhatsApp'ı başlat/bağlan
 router.post('/connect', authenticateToken, async (req, res) => {
   try {
+    // Eğer zaten bağlıysa, önce bağlantıyı kes
+    const currentStatus = getWhatsAppStatus();
+    if (currentStatus.status !== 'disconnected') {
+      try {
+        await disconnectWhatsApp();
+        // Kısa bir bekleme süresi (client'ın tamamen kapanması için)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (disconnectError) {
+        console.error('Disconnect error (ignoring):', disconnectError);
+      }
+    }
+    
     await initializeWhatsApp();
     const status = getWhatsAppStatus();
     res.json({ message: 'WhatsApp bağlantısı başlatıldı', status });
@@ -107,6 +119,9 @@ router.get('/history', authenticateToken, async (req, res) => {
   try {
     const { volunteer_id, limit = 50 } = req.query;
 
+    // LIMIT değerini güvenli bir şekilde integer'a çevir
+    const limitValue = Math.min(Math.max(parseInt(limit as string) || 50, 1), 1000);
+
     let query = `
       SELECT 
         sm.*,
@@ -123,8 +138,8 @@ router.get('/history', authenticateToken, async (req, res) => {
       params.push(volunteer_id);
     }
 
-    query += ' ORDER BY sm.created_at DESC LIMIT ?';
-    params.push(parseInt(limit as string));
+    // LIMIT değerini doğrudan query'ye ekle (placeholder yerine)
+    query += ` ORDER BY sm.created_at DESC LIMIT ${limitValue}`;
 
     const [rows] = await db.execute(query, params);
 

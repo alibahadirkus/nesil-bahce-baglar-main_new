@@ -82,15 +82,26 @@ app.get('/api/health', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   
-  // Mevcut durumu gönder
+  // Mevcut durumu gönder (QR kod dahil)
   const status = getWhatsAppStatus();
   socket.emit('whatsapp-status', status);
   
+  // Eğer QR kod varsa, hemen gönder
+  if (status.qrCode) {
+    socket.emit('whatsapp-qr', status.qrCode);
+  }
+  
   // WhatsApp event'lerini dinle ve client'a gönder
-  whatsappEvents.on('status', (status) => {
+  const statusHandler = (status: string) => {
     const currentStatus = getWhatsAppStatus();
     socket.emit('whatsapp-status', currentStatus);
-  });
+    // QR kod varsa tekrar gönder
+    if (currentStatus.qrCode) {
+      socket.emit('whatsapp-qr', currentStatus.qrCode);
+    }
+  };
+  
+  whatsappEvents.on('status', statusHandler);
   
   whatsappEvents.on('qr', (qr) => {
     socket.emit('whatsapp-qr', qr);
@@ -106,6 +117,8 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
+    // Event listener'ları temizle
+    whatsappEvents.removeListener('status', statusHandler);
   });
 });
 
