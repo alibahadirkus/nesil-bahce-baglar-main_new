@@ -116,11 +116,43 @@ const Images = () => {
   };
 
   const copyToClipboard = (url: string) => {
-    navigator.clipboard.writeText(url);
-    toast({
-      title: 'Başarılı',
-      description: 'Link kopyalandı',
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        toast({
+          title: 'Başarılı',
+          description: 'Link kopyalandı',
+        });
+      }).catch(() => {
+        copyToClipboardFallback(url);
+      });
+    } else {
+      copyToClipboardFallback(url);
+    }
+  };
+
+  const copyToClipboardFallback = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      toast({
+        title: 'Başarılı',
+        description: 'Link kopyalandı',
+      });
+    } catch (err) {
+      toast({
+        title: 'Hata',
+        description: 'Link kopyalanamadı. Lütfen manuel olarak kopyalayın: ' + text,
+        variant: 'destructive',
+      });
+    }
+    document.body.removeChild(textArea);
   };
 
   return (

@@ -321,6 +321,31 @@ const Activities = () => {
     return `${baseUrl}/volunteer/${volunteerId}`;
   };
 
+  const copyToClipboardFallback = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      toast({
+        title: 'Link kopyalandı',
+        description: 'Gönüllü dashboard linki panoya kopyalandı',
+      });
+    } catch (err) {
+      toast({
+        title: 'Hata',
+        description: 'Link kopyalanamadı. Lütfen manuel olarak kopyalayın: ' + text,
+        variant: 'destructive',
+      });
+    }
+    document.body.removeChild(textArea);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -391,11 +416,18 @@ const Activities = () => {
                           size="sm"
                           onClick={() => {
                             const link = getVolunteerDashboardLink(activity.volunteer_id);
-                            navigator.clipboard.writeText(link);
-                            toast({
-                              title: 'Link kopyalandı',
-                              description: 'Gönüllü dashboard linki panoya kopyalandı',
-                            });
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                              navigator.clipboard.writeText(link).then(() => {
+                                toast({
+                                  title: 'Link kopyalandı',
+                                  description: 'Gönüllü dashboard linki panoya kopyalandı',
+                                });
+                              }).catch(() => {
+                                copyToClipboardFallback(link);
+                              });
+                            } else {
+                              copyToClipboardFallback(link);
+                            }
                           }}
                           title="Dashboard linkini kopyala"
                         >
