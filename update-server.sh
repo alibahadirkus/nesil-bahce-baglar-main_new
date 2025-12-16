@@ -1,43 +1,51 @@
 #!/bin/bash
 
-# Sunucu güncelleme script'i
+# Sunucu güncelleme scripti
+# GitHub'dan güncel kodu çek, build et ve servisleri yeniden başlat
 
 set -e
 
-PROJECT_DIR="/var/www/nesil-bahce-baglar"
+echo "🚀 Sunucu güncelleme başlatılıyor..."
 
-echo "🔄 Sunucu güncelleniyor..."
+# Proje dizinine git
+cd ~/nesil-bahce-baglar-main || {
+    echo "❌ Proje dizini bulunamadı!"
+    exit 1
+}
 
-cd $PROJECT_DIR
+echo "📥 GitHub'dan güncel kodu çekiliyor..."
+git pull origin main || {
+    echo "❌ Git pull başarısız!"
+    exit 1
+}
 
-echo "📥 GitHub'dan güncel kod çekiliyor..."
-git fetch origin
-git reset --hard origin/main
-
-echo "📦 Bağımlılıklar kontrol ediliyor..."
+echo "📦 Backend bağımlılıkları güncelleniyor..."
+cd server
 npm install
 
 echo "🔨 Backend build ediliyor..."
-npx tsc --project tsconfig.server.json --outDir dist-server
+npm run build
+
+echo "📦 Frontend bağımlılıkları güncelleniyor..."
+cd ..
+npm install
 
 echo "🔨 Frontend build ediliyor..."
-npm run build:prod
+npm run build
 
-echo "📝 .env dosyası kontrol ediliyor..."
-if [ ! -f "$PROJECT_DIR/dist-server/.env" ]; then
-    cp $PROJECT_DIR/server/.env $PROJECT_DIR/dist-server/.env
-    echo "✅ .env dosyası kopyalandı"
+echo "🗄️ Veritabanı güncellemeleri kontrol ediliyor..."
+# Veritabanı güncellemelerini çalıştır (eğer varsa)
+if [ -f "server/config/db-update.sql" ]; then
+    echo "Veritabanı güncellemeleri uygulanıyor..."
+    mysql -u nesil_bahce_user -p'Deneme123!!!' nesil_bahce_baglar < server/config/db-update.sql || {
+        echo "⚠️ Veritabanı güncellemesi başarısız olabilir (tablolar zaten var olabilir)"
+    }
 fi
 
 echo "🔄 PM2 servisleri yeniden başlatılıyor..."
-pm2 restart all
+pm2 restart nesil-bahce-backend
+pm2 restart nesil-bahce-frontend
 
 echo "✅ Güncelleme tamamlandı!"
-echo ""
 echo "📊 PM2 durumu:"
 pm2 status
-
-echo ""
-echo "🔍 Son loglar:"
-pm2 logs --lines 5 --nostream
-
