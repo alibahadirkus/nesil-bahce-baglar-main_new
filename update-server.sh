@@ -8,7 +8,7 @@ set -e
 echo "🚀 Sunucu güncelleme başlatılıyor..."
 
 # Proje dizinine git
-cd ~/nesil-bahce-baglar-main || {
+cd /var/www/nesil-bahce-baglar || {
     echo "❌ Proje dizini bulunamadı!"
     exit 1
 }

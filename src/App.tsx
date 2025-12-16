@@ -13,6 +13,7 @@ import Trees from "./pages/admin/Trees";
 import Volunteers from "./pages/admin/Volunteers";
 import VolunteerDashboard from "./pages/admin/VolunteerDashboard";
 import Calendar from "./pages/admin/Calendar";
+import Activities from "./pages/admin/Activities";
 import SMS from "./pages/admin/SMS";
 import WhatsApp from "./pages/admin/WhatsApp";
 import Images from "./pages/admin/Images";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="volunteers" element={<Volunteers />} />
             <Route path="volunteer-dashboard" element={<VolunteerDashboard />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="activities" element={<Activities />} />
             <Route path="sms" element={<SMS />} />
             <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="images" element={<Images />} />
