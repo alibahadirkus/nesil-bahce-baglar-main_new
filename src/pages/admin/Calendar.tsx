@@ -9,7 +9,7 @@ import { tr } from 'date-fns/locale';
 import { Calendar as CalendarIcon, TreePine, GraduationCap, Users, Activity } from 'lucide-react';
 
 const CalendarPage = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const { data: trees = [] } = useQuery({
     queryKey: ['trees'],
@@ -127,6 +127,34 @@ const CalendarPage = () => {
   const markedDates = getMarkedDates();
   const selectedDateEvents = selectedDate ? getEventsByDate(selectedDate) : [];
 
+  // Tarih seçilmediğinde tüm aktiviteleri göster
+  const getAllActivities = () => {
+    const allEvents: any[] = [];
+
+    // Tüm aktiviteleri tarih sırasına göre ekle
+    activities.forEach((activity: any) => {
+      if (activity.activity_date) {
+        allEvents.push({
+          type: 'activity',
+          title: activity.title,
+          description: `${activity.volunteer_first_name || ''} ${activity.volunteer_last_name || ''}${activity.location ? ` - ${activity.location}` : ''}`,
+          date: activity.activity_date,
+          icon: Activity,
+          color: 'bg-orange-100 text-orange-800',
+        });
+      }
+    });
+
+    // Tarihe göre sırala (en yeni önce)
+    return allEvents.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA;
+    });
+  };
+
+  const displayedEvents = selectedDate ? selectedDateEvents : getAllActivities();
+
   return (
     <div className="space-y-6">
       <div>
@@ -159,50 +187,59 @@ const CalendarPage = () => {
                 hasEvents: 'bg-primary/20 font-semibold',
               }}
             />
+            {selectedDate && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setSelectedDate(undefined)}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Tarih seçimini kaldır (Tüm aktiviteleri göster)
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Seçili Tarih Etkinlikleri */}
+        {/* Seçili Tarih Etkinlikleri veya Tüm Aktiviteler */}
         <Card>
           <CardHeader>
             <CardTitle>
               {selectedDate
                 ? format(selectedDate, 'd MMMM yyyy', { locale: tr })
-                : 'Tarih Seçin'}
+                : 'Tüm Aktiviteler'}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {selectedDate ? (
-              <div className="space-y-3">
-                {selectedDateEvents.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    Bu tarihte etkinlik yok
-                  </p>
-                ) : (
-                  selectedDateEvents.map((event, index) => {
-                    const Icon = event.icon;
-                    return (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg border ${event.color} border-current/20`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">{event.title}</p>
-                            <p className="text-xs mt-1 opacity-80">{event.description}</p>
-                          </div>
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {displayedEvents.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  {selectedDate ? 'Bu tarihte etkinlik yok' : 'Henüz aktivite eklenmemiş'}
+                </p>
+              ) : (
+                displayedEvents.map((event, index) => {
+                  const Icon = event.icon;
+                  return (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border ${event.color} border-current/20`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm">{event.title}</p>
+                          <p className="text-xs mt-1 opacity-80">{event.description}</p>
+                          {!selectedDate && event.date && (
+                            <p className="text-xs mt-1 opacity-60">
+                              {format(new Date(event.date), 'd MMMM yyyy', { locale: tr })}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    );
-                  })
-                )}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                Etkinlikleri görmek için bir tarih seçin
-              </p>
-            )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
