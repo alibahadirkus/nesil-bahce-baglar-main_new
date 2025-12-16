@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Leaf, LogOut, Users, MessageSquare, MessageCircle, Image, Home, GraduationCap, TreePine } from 'lucide-react';
+import { Leaf, LogOut, Users, MessageSquare, MessageCircle, Image, Home, GraduationCap, TreePine, Calendar, BarChart3 } from 'lucide-react';
 import { authAPI } from '@/lib/api';
 import {
   Sidebar,
@@ -43,9 +43,11 @@ const Layout = () => {
 
   const menuItems = [
     { path: '/admin/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/admin/calendar', icon: Calendar, label: 'Takvim' },
     { path: '/admin/students', icon: GraduationCap, label: 'Öğrenciler' },
     { path: '/admin/trees', icon: TreePine, label: 'Ağaçlar' },
     { path: '/admin/volunteers', icon: Users, label: 'Gönüllüler' },
+    { path: '/admin/volunteer-dashboard', icon: BarChart3, label: 'Gönüllü Dashboard' },
     { path: '/admin/sms', icon: MessageSquare, label: 'SMS Gönderimi' },
     { path: '/admin/whatsapp', icon: MessageCircle, label: 'WhatsApp Gönderimi' },
     { path: '/admin/images', icon: Image, label: 'Resim Yönetimi' },
