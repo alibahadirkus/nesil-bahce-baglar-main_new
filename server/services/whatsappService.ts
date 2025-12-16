@@ -227,9 +227,28 @@ const formatPhoneForWhatsApp = (phone: string): string => {
 // WhatsApp bağlantısını kapat
 export const disconnectWhatsApp = async (): Promise<void> => {
   if (whatsappClient) {
-    await whatsappClient.logout();
-    await whatsappClient.destroy();
-    whatsappClient = null;
+    try {
+      try {
+        await whatsappClient.logout();
+      } catch (error) {
+        console.log('Logout error (ignoring):', error);
+      }
+      
+      try {
+        await whatsappClient.destroy();
+      } catch (error) {
+        console.log('Destroy error (ignoring):', error);
+      }
+    } catch (error) {
+      console.error('Disconnect error:', error);
+    } finally {
+      whatsappClient = null;
+      connectionStatus = 'disconnected';
+      qrCode = null;
+      whatsappEvents.emit('status', connectionStatus);
+    }
+  } else {
+    // Client yoksa bile durumu sıfırla
     connectionStatus = 'disconnected';
     qrCode = null;
     whatsappEvents.emit('status', connectionStatus);

@@ -25,19 +25,16 @@ router.get('/status', authenticateToken, (req, res) => {
 // WhatsApp'ı başlat/bağlan
 router.post('/connect', authenticateToken, async (req, res) => {
   try {
-    // Eğer zaten bağlıysa, önce bağlantıyı kes
-    const currentStatus = getWhatsAppStatus();
-    if (currentStatus.status !== 'disconnected') {
-      try {
-        await disconnectWhatsApp();
-        // Kısa bir bekleme süresi (client'ın tamamen kapanması için)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (disconnectError) {
-        console.error('Disconnect error (ignoring):', disconnectError);
-      }
-    }
+    // Her zaman önce bağlantıyı kes (güvenli başlangıç için)
+    console.log('Disconnecting existing WhatsApp connection...');
+    await disconnectWhatsApp();
     
+    // Client'ın tamamen kapanması için bekle
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    console.log('Initializing new WhatsApp connection...');
     await initializeWhatsApp();
+    
     const status = getWhatsAppStatus();
     res.json({ message: 'WhatsApp bağlantısı başlatıldı', status });
   } catch (error: any) {
