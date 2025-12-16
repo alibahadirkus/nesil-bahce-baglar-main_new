@@ -128,7 +128,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Yeni aktivite ekle (tek veya çoklu gönüllü için)
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { volunteer_id, volunteer_ids, title, description, activity_date, activity_time, location, image_ids } = req.body;
+    const { volunteer_id, volunteer_ids, title, description, activity_date, activity_time, location, image_ids, send_whatsapp } = req.body;
 
     // volunteer_id veya volunteer_ids olmalı
     const volunteerIds = volunteer_ids || (volunteer_id ? [volunteer_id] : []);
@@ -195,26 +195,28 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       activityIds
     );
 
-    // Her gönüllüye WhatsApp mesajı gönder (async, hata olsa bile devam et)
-    const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
-    newActivities.forEach(async (activity: any) => {
-      if (activity.volunteer_phone) {
-        try {
-          const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
-          const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
-          
-          await sendWhatsAppMessage(
-            activity.volunteer_phone,
-            message,
-            activity.volunteer_id,
-            dashboardLink
-          );
-        } catch (error: any) {
-          console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
-          // Hata olsa bile aktivite oluşturma işlemi devam eder
+    // Her gönüllüye WhatsApp mesajı gönder (eğer send_whatsapp true ise, varsayılan true)
+    if (send_whatsapp !== false) {
+      const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
+      newActivities.forEach(async (activity: any) => {
+        if (activity.volunteer_phone) {
+          try {
+            const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
+            const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
+            
+            await sendWhatsAppMessage(
+              activity.volunteer_phone,
+              message,
+              activity.volunteer_id,
+              dashboardLink
+            );
+          } catch (error: any) {
+            console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
+            // Hata olsa bile aktivite oluşturma işlemi devam eder
+          }
         }
-      }
-    });
+      });
+    }
 
     // Tek aktivite varsa tek obje döndür, çoklu varsa array
     res.status(201).json(volunteerIds.length === 1 ? newActivities[0] : newActivities);
@@ -227,7 +229,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
 // Toplu aktivite ekle (birden fazla gönüllü için)
 router.post('/bulk', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { volunteer_ids, title, description, activity_date, activity_time, location, image_ids } = req.body;
+    const { volunteer_ids, title, description, activity_date, activity_time, location, image_ids, send_whatsapp } = req.body;
 
     if (!volunteer_ids || !Array.isArray(volunteer_ids) || volunteer_ids.length === 0) {
       return res.status(400).json({ error: 'Volunteer IDs array is required' });
@@ -295,26 +297,28 @@ router.post('/bulk', authenticateToken, async (req: AuthRequest, res) => {
       activityIds
     );
 
-    // Her gönüllüye WhatsApp mesajı gönder (async, hata olsa bile devam et)
-    const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
-    newActivities.forEach(async (activity: any) => {
-      if (activity.volunteer_phone) {
-        try {
-          const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
-          const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
-          
-          await sendWhatsAppMessage(
-            activity.volunteer_phone,
-            message,
-            activity.volunteer_id,
-            dashboardLink
-          );
-        } catch (error: any) {
-          console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
-          // Hata olsa bile aktivite oluşturma işlemi devam eder
+    // Her gönüllüye WhatsApp mesajı gönder (eğer send_whatsapp true ise, varsayılan true)
+    if (send_whatsapp !== false) {
+      const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
+      newActivities.forEach(async (activity: any) => {
+        if (activity.volunteer_phone) {
+          try {
+            const dashboardLink = `${baseUrl}/volunteer/${activity.volunteer_id}`;
+            const message = `Merhaba ${activity.volunteer_first_name} ${activity.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activity.title}\n${activity.description ? `📝 ${activity.description}\n` : ''}${activity.activity_date ? `📆 Tarih: ${activity.activity_date}\n` : ''}${activity.activity_time ? `⏰ Saat: ${activity.activity_time}\n` : ''}${activity.location ? `📍 Konum: ${activity.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
+            
+            await sendWhatsAppMessage(
+              activity.volunteer_phone,
+              message,
+              activity.volunteer_id,
+              dashboardLink
+            );
+          } catch (error: any) {
+            console.error(`WhatsApp mesajı gönderilemedi (Gönüllü ID: ${activity.volunteer_id}):`, error.message);
+            // Hata olsa bile aktivite oluşturma işlemi devam eder
+          }
         }
-      }
-    });
+      });
+    }
 
     res.status(201).json(newActivities);
   } catch (error: any) {
@@ -395,6 +399,50 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   } catch (error: any) {
     console.error('Delete activity error:', error);
     res.status(500).json({ error: 'Failed to delete activity' });
+  }
+});
+
+// Aktivite için WhatsApp mesajı gönder
+router.post('/:id/send-whatsapp', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [activity]: any = await db.execute(
+      `SELECT va.*, 
+              v.first_name as volunteer_first_name, 
+              v.last_name as volunteer_last_name,
+              v.phone as volunteer_phone
+       FROM volunteer_activities va
+       LEFT JOIN volunteers v ON va.volunteer_id = v.id
+       WHERE va.id = ?`,
+      [id]
+    );
+
+    if (activity.length === 0) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+
+    const activityData = activity[0];
+
+    if (!activityData.volunteer_phone) {
+      return res.status(400).json({ error: 'Volunteer phone number not found' });
+    }
+
+    const baseUrl = process.env.FRONTEND_URL || process.env.API_URL?.replace('/api', '') || 'http://localhost:8080';
+    const dashboardLink = `${baseUrl}/volunteer/${activityData.volunteer_id}`;
+    const message = `Merhaba ${activityData.volunteer_first_name} ${activityData.volunteer_last_name}!\n\nYeni bir aktivite atandı:\n\n📅 ${activityData.title}\n${activityData.description ? `📝 ${activityData.description}\n` : ''}${activityData.activity_date ? `📆 Tarih: ${activityData.activity_date}\n` : ''}${activityData.activity_time ? `⏰ Saat: ${activityData.activity_time}\n` : ''}${activityData.location ? `📍 Konum: ${activityData.location}\n` : ''}\nDashboard linkiniz: ${dashboardLink}`;
+    
+    await sendWhatsAppMessage(
+      activityData.volunteer_phone,
+      message,
+      activityData.volunteer_id,
+      dashboardLink
+    );
+
+    res.json({ message: 'WhatsApp message sent successfully' });
+  } catch (error: any) {
+    console.error('Send WhatsApp error:', error);
+    res.status(500).json({ error: error.message || 'Failed to send WhatsApp message' });
   }
 });
 

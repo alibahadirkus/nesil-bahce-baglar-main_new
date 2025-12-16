@@ -20,7 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Pencil, Trash2, Loader2, Calendar, Users, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Calendar, Users, Upload, X, Image as ImageIcon, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { activitiesAPI, volunteersAPI, uploadAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -40,6 +40,7 @@ const Activities = () => {
   const [selectedVolunteerIdsSingle, setSelectedVolunteerIdsSingle] = useState<number[]>([]);
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [sendWhatsApp, setSendWhatsApp] = useState(true);
   const [formData, setFormData] = useState({
     volunteer_id: '',
     title: '',
@@ -148,6 +149,23 @@ const Activities = () => {
     },
   });
 
+  const sendWhatsAppMutation = useMutation({
+    mutationFn: (id: number) => activitiesAPI.sendWhatsApp(id),
+    onSuccess: () => {
+      toast({
+        title: 'Başarılı',
+        description: 'WhatsApp mesajı gönderildi.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Hata',
+        description: error.message || 'WhatsApp mesajı gönderilemedi',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       volunteer_id: '',
@@ -161,6 +179,7 @@ const Activities = () => {
     setSelectedDate(new Date());
     setSelectedVolunteerIdsSingle([]);
     setSelectedImages([]);
+    setSendWhatsApp(true);
   };
 
   const handleOpenDialog = (activity?: any) => {
@@ -254,6 +273,7 @@ const Activities = () => {
       activity_time: formData.activity_time || undefined,
       location: formData.location || undefined,
       image_ids: imageIds.length > 0 ? imageIds : undefined,
+      send_whatsapp: sendWhatsApp,
     };
 
     if (editingActivity) {
@@ -284,6 +304,7 @@ const Activities = () => {
       activity_time: formData.activity_time || undefined,
       location: formData.location || undefined,
       image_ids: imageIds.length > 0 ? imageIds : undefined,
+      send_whatsapp: sendWhatsApp,
     };
 
     createBulkMutation.mutate(submitData);
@@ -433,6 +454,21 @@ const Activities = () => {
                         >
                           Link
                         </Button>
+                        {activity.volunteer_phone && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => sendWhatsAppMutation.mutate(activity.id)}
+                            disabled={sendWhatsAppMutation.isPending}
+                            title="WhatsApp mesajı gönder"
+                          >
+                            {sendWhatsAppMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <MessageCircle className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -642,6 +678,18 @@ const Activities = () => {
                 )}
               </div>
             </div>
+            {!editingActivity && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="send_whatsapp"
+                  checked={sendWhatsApp}
+                  onCheckedChange={(checked) => setSendWhatsApp(checked as boolean)}
+                />
+                <Label htmlFor="send_whatsapp" className="text-sm font-normal cursor-pointer">
+                  WhatsApp mesajı gönder
+                </Label>
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -828,6 +876,16 @@ const Activities = () => {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="bulk_send_whatsapp"
+                checked={sendWhatsApp}
+                onCheckedChange={(checked) => setSendWhatsApp(checked as boolean)}
+              />
+              <Label htmlFor="bulk_send_whatsapp" className="text-sm font-normal cursor-pointer">
+                WhatsApp mesajı gönder
+              </Label>
             </div>
             <DialogFooter>
               <Button

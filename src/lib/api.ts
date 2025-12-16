@@ -434,6 +434,7 @@ export const activitiesAPI = {
     activity_time?: string;
     location?: string;
     image_ids?: number[];
+    send_whatsapp?: boolean;
   }) => {
     const response = await apiRequest('/activities', {
       method: 'POST',
@@ -450,10 +451,18 @@ export const activitiesAPI = {
     activity_time?: string;
     location?: string;
     image_ids?: number[];
+    send_whatsapp?: boolean;
   }) => {
     const response = await apiRequest('/activities/bulk', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  sendWhatsApp: async (id: number) => {
+    const response = await apiRequest(`/activities/${id}/send-whatsapp`, {
+      method: 'POST',
     });
     return response.json();
   },
