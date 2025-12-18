@@ -9,6 +9,7 @@ const Activities = () => {
   const [activeDetailTab, setActiveDetailTab] = useState("agac-dikimi");
 
   const detailedActivities = [
+    { key: "tanisma-toplantisi", title: "Tanışma Toplantısı" },
     { key: "sakli-bahce", title: "Saklı Bahçedeyiz" },
     { key: "agac-dikimi", title: "Ağaç Dikimi" },
     { key: "kus-cenneti", title: "Kuş Cenneti Gezisi" },
@@ -139,6 +140,24 @@ const Activities = () => {
                 </TabsTrigger>
               ))}
             </TabsList>
+
+            <TabsContent value="tanisma-toplantisi" className="space-y-4 text-sm md:text-base leading-relaxed">
+              <h3 className="text-base md:text-lg font-semibold text-center leading-snug">
+                Tanışma Toplantısı
+              </h3>
+              <div className="space-y-2">
+                <p className="font-semibold">Bu oturumda gerçekleştirilenler:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Tüm katılımcılara projenin tanıtımı yapıldı.</li>
+                  <li>Ekopsikolojik yaklaşımın öneminden bahsedildi.</li>
+                  <li>Proje sürecinde gerçekleştirilecek faaliyet planı açıklandı.</li>
+                  <li>
+                    Projenin web sitesinin ayrıntıları ve dijital uygulamanın nasıl kullanılacağı
+                    katılımcı grupla paylaşıldı.
+                  </li>
+                </ul>
+              </div>
+            </TabsContent>
 
             <TabsContent value="sakli-bahce" className="space-y-4 text-sm md:text-base leading-relaxed">
               <h3 className="text-base md:text-lg font-semibold text-center leading-snug">
