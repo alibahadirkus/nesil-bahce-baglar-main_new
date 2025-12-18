@@ -61,7 +61,8 @@ const Process = () => {
       title: 'Gönüllü Eşleştirme',
       description:
         'Her öğrenci bir gönüllü ile eşleştirilir ve birlikte çalışmaya başlarlar',
-      onClick: () => navigate('/process-step/2'),
+      // Bu adım sadece bilgi amaçlı, tıklanamaz
+      onClick: undefined,
     },
     {
       step: 3,

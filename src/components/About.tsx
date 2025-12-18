@@ -95,7 +95,7 @@ const About = () => {
       </div>
 
       <Dialog open={isDiagramOpen} onOpenChange={setIsDiagramOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Araştırma Amacı</DialogTitle>
             <DialogDescription>
@@ -229,7 +229,7 @@ const About = () => {
       </Dialog>
 
       <Dialog open={isHorticultureDialogOpen} onOpenChange={setIsHorticultureDialogOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Proje Amacı</DialogTitle>
             <DialogDescription>
