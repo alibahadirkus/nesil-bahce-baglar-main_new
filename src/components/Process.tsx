@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, UserPlus, TreePine, Droplets, Sprout, Camera, X } from 'lucide-react';
 import {
@@ -19,6 +19,7 @@ import { publicStudentsAPI, publicVolunteersAPI } from '@/lib/api';
 
 const Process = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
   const [isVolunteerDialogOpen, setIsVolunteerDialogOpen] = useState(false);
   const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
@@ -44,6 +45,14 @@ const Process = () => {
     address: '',
     notes: '',
   });
+
+  // URL'den gelen parametre ile gönüllü formunu aç (ör: "/?openVolunteer=1")
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('openVolunteer') === '1') {
+      setIsVolunteerDialogOpen(true);
+    }
+  }, [location.search]);
 
   const steps = [
     {

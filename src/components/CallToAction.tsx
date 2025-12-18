@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CallToAction = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 bg-gradient-primary relative overflow-hidden">
       {/* Decorative Elements */}
@@ -34,7 +37,12 @@ const CallToAction = () => {
           </div>
 
           <div className="text-center">
-            <Button variant="hero" size="lg" className="text-lg">
+            <Button
+              variant="hero"
+              size="lg"
+              className="text-lg"
+              onClick={() => navigate("/?openVolunteer=1")}
+            >
               Gönüllü Ol
             </Button>
           </div>
