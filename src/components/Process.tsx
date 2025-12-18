@@ -52,7 +52,8 @@ const Process = () => {
       title: 'Öğrenci Kaydı',
       description:
         'Lise öğrencileri projeye kaydolur ve kendilerine bir gönüllü eşleştirilir',
-      onClick: () => navigate('/process-step/1'),
+      // Öğrenci kayıt formu aç
+      onClick: () => setIsStudentDialogOpen(true),
     },
     {
       step: 2,
@@ -67,7 +68,8 @@ const Process = () => {
       icon: TreePine,
       title: 'Gönüllü Katılımcı',
       description: 'Öğrenci ve gönüllü birlikte okul bahçesinde ağacı dikerler',
-      onClick: () => navigate('/process-step/3'),
+      // Gönüllü kayıt formu aç
+      onClick: () => setIsVolunteerDialogOpen(true),
     },
     {
       step: 4,
