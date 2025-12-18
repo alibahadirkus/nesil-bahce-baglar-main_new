@@ -93,7 +93,8 @@ const Process = () => {
       step: 5,
       icon: Sprout,
       title: 'Büyüme Takibi',
-      onClick: () => navigate('/process-step/5'),
+      // Bu adım sadece bilgi amaçlı, tıklanamaz
+      onClick: undefined,
     },
     {
       step: 6,
